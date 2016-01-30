@@ -1,0 +1,15 @@
+FROM golang:1.6
+
+ENV GOPATH /go:/go/src/github.com/ethereum/go-ethereum/Godeps/_workspace
+
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y git build-essential && \
+    git clone --branch=develop --depth=1 https://github.com/ethereum/go-ethereum /go/src/github.com/ethereum/go-ethereum && \
+    go build -v github.com/ethereum/go-ethereum/cmd/geth && \
+    mv geth / && \
+    apt-get purge --auto-remove -y git build-essential && \
+    rm -rf /go
+ADD Dockerfile /
+
+# Output a tarball to build the final image
+CMD tar -chf - -C / geth -C /lib/x86_64-linux-gnu libpthread.so.0 -C / Dockerfile
